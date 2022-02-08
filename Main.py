@@ -1,10 +1,37 @@
 from curses import window
 from curses.ascii import isdigit
 import tkinter as tk
+import random
+import datetime
 
-goalWord = 'ENGINE'
+from numpy import append
+
+goalWord = ""
 currentGuess = ''
 previousGuesses = []
+
+# sets goal word to random word from file of length x
+def getWord(filename, length):
+    # Read file
+    fileObj = open(filename, "r")   # open file in read mode
+    allWords = fileObj.read().splitlines()  # put all files into array
+    fileObj.close()
+
+    # get all words of length x
+    words = [""]
+    for i in range(len(allWords)):
+        if (len(allWords[i]) == length):
+            words.append(allWords[i])
+
+    # set seed and pick random word
+    current_date = datetime.datetime.now()
+    random.seed(current_date.hour * current_date.minute * current_date.second)
+    
+    global goalWord
+    goalWord = words[random.randint(0,len(words))].upper()
+
+    print(goalWord)
+    
 
 
 def clearRow(i):
@@ -56,6 +83,7 @@ def update_row(character):
 
 # Display row
 def create_row(canvas, canvas_width, canvas_height, row_id, guess, tag, checkcolour):
+    global goalWord
 
     for i in range(6):
 
@@ -106,6 +134,7 @@ canvas.pack()
 
 # create blank instance of first row
 create_row(canvas, 600, 500, 0, "", "row0", False)
+getWord("words.txt", 6)
 
 
 window.mainloop()
