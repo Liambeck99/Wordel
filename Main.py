@@ -9,6 +9,7 @@ from numpy import append
 goalWord = ""
 currentGuess = ''
 previousGuesses = []
+words = []
 
 # sets goal word to random word from file of length x
 def getWord(filename, length):
@@ -18,7 +19,6 @@ def getWord(filename, length):
     fileObj.close()
 
     # get all words of length x
-    words = [""]
     for i in range(len(allWords)):
         if (len(allWords[i]) == length):
             words.append(allWords[i])
@@ -26,18 +26,24 @@ def getWord(filename, length):
     # set seed and pick random word
     current_date = datetime.datetime.now()
     random.seed(current_date.hour * current_date.minute * current_date.second)
-    
-    global goalWord
     goalWord = words[random.randint(0,len(words))].upper()
 
+    #### FOR PROTOTYPE USE ONLY ####
     print(goalWord)
-    
 
+    return(goalWord, words)
 
 def clearRow(i):
-
     string = 'current&&row' + str(i)
     canvas.delete('current&&row')
+
+def listContains(string, list):
+    if string in list:
+        print("EXIST")
+        return True
+
+    print("DOESNT EXIST")
+    return False
 
 # Function call when backspace is pressed
 def onBackspacePress(event):
@@ -60,8 +66,12 @@ def onKeyPress(event):
 
 def onReturnPress(event):
     global currentGuess
+    global words
 
     if ( len(currentGuess) != 6 ):
+        return
+    
+    if ( not listContains(currentGuess, words) ):
         return
 
     # add current guess to start of guess list
@@ -135,12 +145,14 @@ window.bind('<BackSpace>', onBackspacePress)
 window.bind('<Key>', onKeyPress)
 window.bind('<Return>', onReturnPress)
 
+# Initialize canvas
 canvas = tk.Canvas(window, width = 600, height = 500, bg='#25272a', borderwidth='0', highlightthickness=0)
 canvas.pack()
 
 # create blank instance of first row
 create_row(canvas, 600, 500, 0, "", "row0", False)
-getWord("words.txt", 6)
 
+# Initialize goal word and list of existing words of length n
+goalWord, words = getWord("words.txt", 6)
 
 window.mainloop()
