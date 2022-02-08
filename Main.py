@@ -47,8 +47,14 @@ def onBackspacePress(event):
     clearRow(1)
     create_row(canvas, 600, 500, 0, currentGuess.upper(), "row0", False)
 
+# Handle key press
 def onKeyPress(event):
+
+    if( len(currentGuess) == 6):
+        return
+
     character = event.char
+
     if( character.isalpha() ):
         update_row(character)
 
