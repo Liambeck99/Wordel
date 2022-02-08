@@ -6,6 +6,7 @@ import datetime
 
 from numpy import append
 
+targetLength = 4
 goalWord = ""
 currentGuess = ''
 previousGuesses = []
@@ -39,10 +40,7 @@ def clearRow(i):
 
 def listContains(string, list):
     if string in list:
-        print("EXIST")
         return True
-
-    print("DOESNT EXIST")
     return False
 
 # Function call when backspace is pressed
@@ -55,8 +53,9 @@ def onBackspacePress(event):
 
 # Handle key press
 def onKeyPress(event):
+    global targetLength
 
-    if( len(currentGuess) == 6):
+    if( len(currentGuess) == targetLength):
         return
 
     character = event.char
@@ -67,8 +66,9 @@ def onKeyPress(event):
 def onReturnPress(event):
     global currentGuess
     global words
+    global targetLength
 
-    if ( len(currentGuess) != 6 ):
+    if ( len(currentGuess) != targetLength ):
         return
     
     if ( not listContains(currentGuess, words) ):
@@ -98,10 +98,11 @@ def update_row(character):
     create_row(canvas, 600, 500, 0, currentGuess.upper(), "row1", False)
 
 # Display row
-def create_row(canvas, canvas_width, canvas_height, row_id, guess, tag, checkcolour):
+def create_row(canvas, canvas_width, canvas_height, row_id,  guess, tag, checkcolour):
     global goalWord
+    global targetLength
 
-    for i in range(6):
+    for i in range(targetLength):
 
         # initialise tags
         tags = (tag,)
@@ -110,7 +111,9 @@ def create_row(canvas, canvas_width, canvas_height, row_id, guess, tag, checkcol
         box_width = 50
         box_height = 50
         margin = 4
-        x_start = (canvas_width/2) - 3*box_width - 2*margin
+
+        # start of row dependent on word length
+        x_start = (canvas_width/2) - targetLength/2*box_width - (targetLength/2 -1)*margin 
         x = x_start + box_width*i + margin*i
         y_start = box_height*row_id + margin*row_id
         y = y_start + box_height + margin
@@ -153,6 +156,6 @@ canvas.pack()
 create_row(canvas, 600, 500, 0, "", "row0", False)
 
 # Initialize goal word and list of existing words of length n
-goalWord, words = getWord("words.txt", 6)
+goalWord, words = getWord("words.txt", targetLength)
 
 window.mainloop()
