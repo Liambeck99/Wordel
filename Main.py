@@ -2,8 +2,9 @@ from curses import window
 from curses.ascii import isdigit
 import tkinter as tk
 
-goalWord = "ENGINE"
-currentGuess = ""
+goalWord = 'ENGINE'
+currentGuess = ''
+previousGuesses = []
 
 
 def clearRow(i):
@@ -12,12 +13,12 @@ def clearRow(i):
     canvas.delete('current&&row')
 
 # Function call when backspace is pressed
-def onBackspace(event):
+def onBackspacePress(event):
     global currentGuess
     # slice off last element, clear row & redraw
     currentGuess = currentGuess[:-1]
     clearRow(1)
-    create_row(canvas, 600, 500, 1, currentGuess.upper(), "row1")
+    create_row(canvas, 600, 500, 0, currentGuess.upper(), "row0", False)
 
 def onKeyPress(event):
     character = event.char
@@ -25,8 +26,25 @@ def onKeyPress(event):
         update_row(character)
 
 def onReturnPress(event):
-    a = 1
+    global currentGuess
 
+    if ( len(currentGuess) != 6 ):
+        return
+
+    # add current guess to start of guess list
+    previousGuesses.insert(0,currentGuess)
+    # clear current guess
+    currentGuess = ''
+
+    # redraw empty first row
+    clearRow(0)
+    create_row(canvas, 600, 500, 0, currentGuess.upper(), "row0", False)
+
+    # draw row for all previous guesses
+    for i in range( len(previousGuesses)):
+        row = 'row' + str(i+1)
+        create_row(canvas, 600, 500, i+1, previousGuesses[i].upper(), row, True)
+    
 
 def update_row(character):
     global currentGuess
@@ -34,10 +52,10 @@ def update_row(character):
     # add new character, clear row and redraw
     currentGuess += character
     clearRow(1)
-    create_row(canvas, 600, 500, 1, currentGuess.upper(), "row1")
+    create_row(canvas, 600, 500, 0, currentGuess.upper(), "row1", False)
 
 # Display row
-def create_row(canvas, canvas_width, canvas_height, row_id, guess, tag):
+def create_row(canvas, canvas_width, canvas_height, row_id, guess, tag, checkcolour):
 
     for i in range(6):
 
@@ -56,7 +74,16 @@ def create_row(canvas, canvas_width, canvas_height, row_id, guess, tag):
         coordinates = ( x, y,x+box_width,y+box_height)
 
         # draw rectange
-        canvas.create_rectangle(coordinates, fill='#404245', outline='#404245' )
+        # if checking previous guess
+        colour = '#404245'
+        if (checkcolour):
+            if (guess[i] == goalWord[i]):
+                colour = '#6e9960' # green
+            elif guess[i] in goalWord:
+                colour = '#d5b081' # yellow
+            else:
+                colour = '#18191A' # dark
+        canvas.create_rectangle(coordinates, fill=colour, outline=colour )
 
         # if no letter exists dont create a text
         if ( i > len(guess)-1 ):
@@ -70,15 +97,15 @@ window = tk.Tk()
 window.title('Wordel')
 window.geometry('600x500')
 window.configure(bg='#25272a')
-window.bind('<BackSpace>', onBackspace)
+window.bind('<BackSpace>', onBackspacePress)
 window.bind('<Key>', onKeyPress)
+window.bind('<Return>', onReturnPress)
 
 canvas = tk.Canvas(window, width = 600, height = 500, bg='#25272a', borderwidth='0', highlightthickness=0)
 canvas.pack()
 
 # create blank instance of first row
-create_row(canvas, 600, 500, 1, "", "row1")
-
+create_row(canvas, 600, 500, 0, "", "row0", False)
 
 
 window.mainloop()
