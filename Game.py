@@ -3,10 +3,8 @@ from curses.ascii import isdigit
 import tkinter as tk
 import random
 import datetime
-from Menu import MenuClass
 
 from numpy import append
-
 
 # Class to control the Game Logic
 class GameLoop:
@@ -14,30 +12,38 @@ class GameLoop:
     def __init__(self, targetLength, filename):
         self.targetLength = targetLength
         self.goalWord, self.words = self.getWord(filename, targetLength)
+
+        ## PROTOTYPE PURPOSES ONLY ##
+        print(self.goalWord)
+
         self.currentGuess = ""
         self.previousGuesses = []
+        self.bgcolour = '#25272a'
+        self.lightcolour = '#404245'
+        self.darkcolour = '#18191A'
+        self.greencolour = '#6e9960'
+        self.yellowcolour = '#d5b081'
         self.initialiseWindow(600,500)
-        self.window.mainloop()
+        self.gameWindow.mainloop()
 
     # Create the window with size
     def initialiseWindow(self, width, height):
-        self.bgcolour = '#25272a'
         # Initialize and configure windows
-        self.window = tk.Tk()
-        self.window.title('Wordel')
+        self.gameWindow = tk.Tk()
+        self.gameWindow.title('Wordel')
         dimensions = str(width) + 'x' + str(height)
-        self.window.geometry(dimensions)
-        self.window.configure(bg=self.bgcolour)
-        self.window.bind('<BackSpace>', self.onBackspacePress)
-        self.window.bind('<Key>', self.onKeyPress)
-        self.window.bind('<Return>', self.onReturnPress)
+        self.gameWindow.geometry(dimensions)
+        self.gameWindow.configure(bg=self.bgcolour)
+        self.gameWindow.bind('<BackSpace>', self.onBackspacePress)
+        self.gameWindow.bind('<Key>', self.onKeyPress)
+        self.gameWindow.bind('<Return>', self.onReturnPress)
 
         # Initialize canvas
-        self.canvas = tk.Canvas(self.window, width = width, height = height, bg=self.bgcolour, borderwidth='0', highlightthickness=0)
-        self.canvas.pack()
+        self.gameCanvas = tk.Canvas(self.gameWindow, width = width, height = height, bg=self.bgcolour, borderwidth='0', highlightthickness=0)
+        self.gameCanvas.pack()
 
         # create blank instance of first row
-        self.create_row(self.canvas, 600, 500, 0, "", "row0", False)
+        self.create_row(600, 500, 0, "", "row0", False)
 
     # Returns goal word and list of all words in file of length X
     def getWord(self, filename, length):
@@ -61,7 +67,7 @@ class GameLoop:
         return(goalWord, words)
 
     # Display row
-    def create_row(self, canvas, canvas_width, canvas_height, row_id,  guess, tag, checkcolour):
+    def create_row(self, canvas_width, canvas_height, row_id,  guess, tag, checkcolour):
         for i in range(self.targetLength):
 
             # initialise tags
@@ -82,34 +88,34 @@ class GameLoop:
 
             # draw rectange
             # if checking previous guess
-            colour = '#404245'
+            colour = self.lightcolour
             if (checkcolour):
                 if (guess[i] == self.goalWord[i]):
-                    colour = '#6e9960' # green
+                    colour = self.greencolour # green
                 elif guess[i] in self.goalWord:
-                    colour = '#d5b081' # yellow
+                    colour = self.yellowcolour # yellow
                 else:
-                    colour = '#18191A' # dark
-            canvas.create_rectangle(coordinates, fill=colour, outline=colour )
+                    colour = self.darkcolour # dark
+            self.gameCanvas.create_rectangle(coordinates, fill=colour, outline=colour )
 
             # if no letter exists dont create a text
             if ( i > len(guess)-1 ):
                 continue
             else:
-                canvas.create_text(x+box_width/2, y+box_height/2, text=guess[i], fill="white", tags=tags, font=("Arial",25))
-                canvas.lower(id)
+                self.gameCanvas.create_text(x+box_width/2, y+box_height/2, text=guess[i], fill="white", tags=tags, font=("Arial",25))
+                self.gameCanvas.lower(id)
 
     # Update the current row with the caracter
     def update_row(self, character):        
         # add new character, clear row and redraw
         self.currentGuess += character.upper()
         self.clearRow(1)
-        self.create_row(self.canvas, 600, 500, 0, self.currentGuess, "row1", False)
+        self.create_row(600, 500, 0, self.currentGuess, "row1", False)
 
     # Deletes the row at index i
     def clearRow(self, i):
         string = 'current&&row' + str(i)
-        self.canvas.delete(string)
+        self.gameCanvas.delete(string)
     
     # Returns true if current guess exists in word list
     def currentGuessExists(self):
@@ -122,7 +128,7 @@ class GameLoop:
         # slice off last element, clear row & redraw
         self.currentGuess = self.currentGuess[:-1]
         self.clearRow(1)
-        self.create_row(self.canvas, 600, 500, 0, self.currentGuess.upper(), "row0", False)
+        self.create_row(600, 500, 0, self.currentGuess.upper(), "row0", False)
 
     # Handle key press
     def onKeyPress(self, event):
@@ -153,9 +159,9 @@ class GameLoop:
 
         # redraw empty first row
         self.clearRow(0)
-        self.create_row(self.canvas, 600, 500, 0, self.currentGuess, "row0", False)
+        self.create_row(600, 500, 0, self.currentGuess, "row0", False)
 
         # draw row for all previous guesses
         for i in range( len(self.previousGuesses)):
             row = 'row' + str(i+1)
-            self.create_row(self.canvas, 600, 500, i+1, self.previousGuesses[i], row, True)
+            self.create_row(600, 500, i+1, self.previousGuesses[i], row, True)
