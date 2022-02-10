@@ -23,8 +23,8 @@ class MenuController:
         self.menuWindow.configure(bg=self.bgcolour)
 
         # Initialize canvas
-        self.canvas = tk.Canvas(self.menuWindow, width = width, height = height, bg=self.bgcolour, borderwidth='0', highlightthickness=0)
-        self.canvas.pack()
+        # self.canvas = tk.Canvas(self.menuWindow, width = width, height = height, bg=self.bgcolour, borderwidth='0', highlightthickness=0)
+        # self.canvas.pack()
 
         self.initialiseUI()
 
